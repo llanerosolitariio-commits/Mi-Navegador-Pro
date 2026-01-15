@@ -1,15 +1,17 @@
 {
-  "name": "Cantos para la Misa",
+  "name": "Cantos para la Santa Misa",
   "short_name": "CantosMisa",
+  "description": "Repertorio de cantos y avisos para la Santa Misa.",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#f8f9fa",
-  "theme_color": "#312e81",
+  "background_color": "#f0f2f5",
+  "theme_color": "#1e3a8a",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/2855/2855132.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
