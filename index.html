@@ -8,33 +8,190 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
+        
         body { 
-            font-family: 'Source Sans Pro', sans-serif; 
-            background-color: #f0f2f5; 
-            color: #333; 
-            line-height: 1.6;
-            background-image: url('https://images.unsplash.com/photo-1549673896-0f39a037b516?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); /* Imagen de fondo sutil */
+            font-family: 'Lora', serif; 
+            background-color: #f4f1ea; 
+            color: #2c3e50;
+            background-image: url('https://images.unsplash.com/photo-1544427920-c49ccfb85579?q=80&w=2000&auto=format&fit=crop'); 
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
-        .overlay { background-color: rgba(255, 255, 255, 0.85); min-height: 100vh; padding-bottom: 3rem; }
-        h1, h2 { font-family: 'Playfair Display', serif; }
-        .card { background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); transition: all 0.3s ease; border: 1px solid #e0e0e0; }
-        .card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
-        .admin-panel { display: none; } /* Oculto por defecto */
-        .header-title { text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
-        .admin-btn-icon { opacity: 0; /* Inicialmente invisible */
-             position: fixed; bottom: 1.5rem; right: 1.5rem;
-             width: 3rem; height: 3rem; 
-             background-color: #a0a0a0; /* Color discreto */
-             color: white; border-radius: 50%; 
-             display: flex; align-items: center; justify-content: center;
-             font-size: 1.25rem; cursor: pointer;
-             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-             transition: opacity 0.3s ease-in-out, background-color 0.3s;
-             z-index: 50;
+
+        .overlay { 
+            background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(244,241,234,0.95));
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+        .nav-liturgica {
+            background: #1a365d;
+            border-bottom: 4px solid #c5a059;
+        }
+
+        .card-canto {
+            background: white;
+            border-radius: 20px;
+            border-bottom: 5px solid #c5a059;
+            transition: all 0.4s ease;
+        }
+
+        .card-canto:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .btn-admin-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1a365d;
+            color: #c5a059;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 100;
+            opacity: 0.6;
+        }
+
+        .btn-admin-float:hover { opacity: 1; transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+    <div class="overlay">
+        <nav class="nav-liturgica p-6 text-center shadow-xl">
+            <h1 class="text-white text-3xl md:text-4xl font-bold tracking-wide">Cantos para la Santa Misa</h1>
+            <p class="text-yellow-200 italic text-sm mt-2 font-light">"Quien canta, ora dos veces" — San Agustín</p>
+        </nav>
+
+        <main class="max-w-4xl mx-auto p-4 md:p-8">
+            <section class="mb-12">
+                <div class="bg-white/80 p-6 rounded-3xl border-2 border-indigo-100 text-center shadow-sm">
+                    <i class="fas fa-dove text-indigo-400 text-2xl mb-3"></i>
+                    <h2 class="text-indigo-900 font-bold uppercase text-xs tracking-widest mb-2">Mensaje del Día</h2>
+                    <p id="infoDisplay" class="text-xl text-gray-800 italic leading-relaxed">Cargando avisos pastorales...</p>
+                </div>
+            </section>
+
+            <section>
+                <div class="flex items-center justify-center gap-4 mb-8">
+                    <div class="h-px bg-gray-300 w-16"></div>
+                    <h2 class="text-2xl font-bold text-indigo-900 uppercase tracking-tight">Repertorios</h2>
+                    <div class="h-px bg-gray-300 w-16"></div>
+                </div>
+                <div id="repertorioGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    </div>
+            </section>
+        </main>
+    </div>
+
+    <div onclick="document.getElementById('adminModal').style.display='flex'" class="btn-admin-float">
+        <i class="fas fa-shield-alt"></i>
+    </div>
+
+    <div id="adminModal" class="hidden fixed inset-0 bg-indigo-900/90 backdrop-blur-md z-[100] p-4 flex items-center justify-center" style="display: none;">
+        <div class="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-indigo-900">Panel Admin</h2>
+                <button onclick="this.closest('#adminModal').style.display='none'" class="text-gray-400 hover:text-red-500 text-3xl">&times;</button>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-indigo-900 mb-2">Aviso del Domingo:</label>
+                    <textarea id="adminInfoInput" class="w-full border-2 border-indigo-50 rounded-xl p-3 focus:border-indigo-500 outline-none" rows="2"></textarea>
+                    <button onclick="saveInfo()" class="mt-2 bg-indigo-600 text-white w-full py-2 rounded-xl font-bold shadow-lg">Actualizar Aviso</button>
+                </div>
+
+                <hr class="border-indigo-50">
+
+                <div>
+                    <label class="block text-sm font-bold text-indigo-900 mb-2">Nuevo Repertorio:</label>
+                    <input type="text" id="repTitle" placeholder="Nombre (Ej: Domingo de Ramos)" class="w-full border-2 border-indigo-50 rounded-xl p-3 mb-2 outline-none">
+                    <input type="text" id="repLink" placeholder="Enlace del PDF/Imagen" class="w-full border-2 border-indigo-50 rounded-xl p-3 mb-4 outline-none">
+                    <button onclick="addRepertorio()" class="bg-emerald-600 text-white w-full py-3 rounded-xl font-bold shadow-lg">Publicar Cantos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBBanDBBiOdoaNrgzUGlIsfkWl5FLTMM3E",
+            authDomain: "cantosmisa-9302b.firebaseapp.com",
+            projectId: "cantosmisa-9302b",
+            storageBucket: "cantosmisa-9302b.firebasestorage.app",
+            messagingSenderId: "16103888796",
+            appId: "1:16103888796:web:95ab73d3f002414a3fda59",
+            measurementId: "G-12D4MCRXKQ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Aviso
+        window.saveInfo = async () => {
+            const text = document.getElementById('adminInfoInput').value;
+            await setDoc(doc(db, "ajustes", "avisoPrincipal"), { contenido: text });
+            alert("Aviso actualizado.");
+        };
+
+        onSnapshot(doc(db, "ajustes", "avisoPrincipal"), (doc) => {
+            if (doc.exists()) {
+                document.getElementById('infoDisplay').innerText = doc.data().contenido;
+                document.getElementById('adminInfoInput').value = doc.data().contenido;
+            }
+        });
+
+        // Repertorios
+        window.addRepertorio = async () => {
+            const title = document.getElementById('repTitle').value;
+            const link = document.getElementById('repLink').value;
+            if(!title || !link) return alert('Datos incompletos');
+            await addDoc(collection(db, "repertorios"), { title, link, fecha: Date.now() });
+            document.getElementById('repTitle').value = '';
+            document.getElementById('repLink').value = '';
+        };
+
+        window.deleteRep = async (id) => {
+            if(confirm('¿Eliminar para todos?')) await deleteDoc(doc(db, "repertorios", id));
+        };
+
+        const q = query(collection(db, "repertorios"), orderBy("fecha", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const grid = document.getElementById('repertorioGrid');
+            grid.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const rep = doc.data();
+                grid.innerHTML += `
+                    <div class="card-canto p-6 text-center">
+                        <h3 class="font-bold text-xl text-indigo-900 mb-4">${rep.title}</h3>
+                        <div class="flex items-center justify-center gap-3">
+                            <a href="${rep.link}" target="_blank" class="bg-indigo-900 text-yellow-200 px-6 py-2 rounded-full text-sm font-bold shadow-md hover:bg-indigo-800 transition">
+                                <i class="fas fa-music mr-2"></i> VER CANTOS
+                            </a>
+                            <button onclick="deleteRep('${doc.id}')" class="text-gray-200 hover:text-red-500 transition">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>`;
+            });
+        });
+    </script>
+</body>
+</html>             z-index: 50;
         }
         .admin-btn-icon:hover { background-color: #808080; }
         .admin-btn-icon.visible { opacity: 1; } /* Visible al scrollear */
@@ -563,6 +720,7 @@
     </script>
 </body>
 </html>
+
 
 
 
