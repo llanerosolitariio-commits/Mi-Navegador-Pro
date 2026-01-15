@@ -3,105 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Cine Personal</title>
+    <title>Cantos para la Misa</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #0a0a0a; color: white; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        video { width: 100%; border-radius: 1rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        .movie-card:hover { transform: scale(1.05); background: #1a1a1a; }
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; color: #1a1a1a; }
+        h1, h2 { font-family: 'Playfair Display', serif; }
+        .admin-panel { display: none; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        .hidden { display: none; }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="pb-20">
 
-    <div class="max-w-6xl mx-auto">
-        <div class="flex flex-wrap justify-between items-center mb-10 gap-4">
-            <div>
-                <h1 class="text-4xl font-black text-red-600 tracking-tighter">MI<span class="text-white">CINE</span></h1>
-                <p class="text-gray-500 text-sm">Streaming Local de Alta Velocidad</p>
-            </div>
-            <label class="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-xl font-bold cursor-pointer transition shadow-lg flex items-center gap-2">
-                <i class="fas fa-film"></i> CARGAR CARPETA DE PELIS
-                <input type="file" id="movieInput" webkitdirectory directory multiple class="hidden">
-            </label>
+    <nav class="bg-white border-b p-4 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-indigo-900">Cantos para la Misa</h1>
+            <button onclick="toggleAdmin()" class="text-gray-400 hover:text-indigo-600"><i class="fas fa-user-shield"></i></button>
         </div>
+    </nav>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            <div class="lg:col-span-2">
-                <div id="playerContainer" class="hidden">
-                    <video id="mainVideo" controls class="mb-6"></video>
-                    <h2 id="playingTitle" class="text-2xl font-bold mb-2"></h2>
-                    <hr class="border-gray-800">
+    <div class="max-w-4xl mx-auto p-4">
+        <section id="infoSection" class="mb-10">
+            <h2 class="text-xl mb-4 text-indigo-800">Avisos e Información</h2>
+            <div id="infoDisplay" class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded text-indigo-900 italic">
+                Cargando avisos del domingo...
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-xl mb-4 text-indigo-800">Repertorios de Domingo</h2>
+            <div id="repertorioGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 </div>
-                <div id="emptyState" class="glass p-20 rounded-3xl text-center">
-                    <i class="fas fa-clapperboard text-6xl text-gray-700 mb-6 block"></i>
-                    <h3 class="text-xl font-medium text-gray-400">Selecciona la carpeta donde tienes tus películas para empezar</h3>
-                </div>
+        </section>
+    </div>
+
+    <div id="adminModal" class="admin-panel fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] p-4 flex items-center justify-center">
+        <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Panel Pro</h2>
+                <button onclick="toggleAdmin()" class="text-gray-500 text-2xl">&times;</button>
             </div>
 
-            <div class="lg:col-span-1">
-                <div class="glass rounded-3xl overflow-hidden p-4">
-                    <h3 class="font-bold mb-4 flex items-center gap-2">
-                        <i class="fas fa-list text-red-500"></i> Biblioteca (<span id="movieCount">0</span>)
-                    </h3>
-                    <div id="movieList" class="space-y-2 max-h-[70vh] overflow-y-auto pr-2">
-                        </div>
-                </div>
+            <div class="mb-8">
+                <label class="block text-sm font-bold mb-2">Información Importante:</label>
+                <textarea id="adminInfoInput" class="w-full border rounded-lg p-2 text-sm" rows="3" placeholder="Escribe el aviso principal..."></textarea>
+                <button onclick="saveInfo()" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm w-full font-bold">Publicar Aviso</button>
+            </div>
+
+            <hr class="my-6">
+
+            <div>
+                <label class="block text-sm font-bold mb-2">Nuevo Repertorio:</label>
+                <input type="text" id="repTitle" placeholder="Nombre del Domingo (ej: Domingo de Ramos)" class="w-full border rounded-lg p-2 mb-2 text-sm">
+                <input type="text" id="repLink" placeholder="Link al PDF o Imagen (URL)" class="w-full border rounded-lg p-2 mb-4 text-sm">
+                <button onclick="addRepertorio()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm w-full font-bold">Agregar al Domingo</button>
             </div>
         </div>
     </div>
 
     <script>
+        // Registrar Service Worker para PWA
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
 
-        const movieInput = document.getElementById('movieInput');
-        const movieList = document.getElementById('movieList');
-        const mainVideo = document.getElementById('mainVideo');
-        const playerContainer = document.getElementById('playerContainer');
-        const emptyState = document.getElementById('emptyState');
-        const playingTitle = document.getElementById('playingTitle');
-        const movieCount = document.getElementById('movieCount');
-
-        movieInput.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
-            // Filtramos archivos de video comunes
-            const movies = files.filter(f => f.type.startsWith('video/') || f.name.endsWith('.mkv'));
-            
-            if (movies.length > 0) {
-                movieCount.innerText = movies.length;
-                emptyState.classList.add('hidden');
-                playerContainer.classList.remove('hidden');
-                renderMovies(movies);
-                loadMovie(movies[0]);
-            }
+        // Cargar datos al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            renderInfo();
+            renderRepertorios();
         });
 
-        function renderMovies(movies) {
-            movieList.innerHTML = '';
-            movies.forEach((movie, index) => {
-                const item = document.createElement('div');
-                item.className = "movie-card p-3 rounded-xl cursor-pointer transition flex items-center gap-3 border border-transparent";
-                item.innerHTML = `
-                    <div class="w-12 h-12 bg-gray-800 rounded flex items-center justify-center">
-                        <i class="fas fa-play text-xs"></i>
-                    </div>
-                    <p class="text-sm truncate font-medium">${movie.name}</p>
-                `;
-                item.onclick = () => loadMovie(movie);
-                movieList.appendChild(item);
-            });
+        function toggleAdmin() {
+            const modal = document.getElementById('adminModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
         }
 
-        function loadMovie(file) {
-            const url = URL.createObjectURL(file);
-            mainVideo.src = url;
-            playingTitle.innerText = file.name.replace(/\.[^/.]+$/, "");
-            mainVideo.play();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        // --- LÓGICA DE INFORMACIÓN ---
+        function saveInfo() {
+            const text = document.getElementById('adminInfoInput').value;
+            localStorage.setItem('misaInfo', text);
+            renderInfo();
+            alert('Aviso actualizado');
+        }
+
+        function renderInfo() {
+            const info = localStorage.getItem('misaInfo') || "No hay avisos recientes.";
+            document.getElementById('infoDisplay').innerText = info;
+            document.getElementById('adminInfoInput').value = info;
+        }
+
+        // --- LÓGICA DE REPERTORIOS ---
+        function addRepertorio() {
+            const title = document.getElementById('repTitle').value;
+            const link = document.getElementById('repLink').value;
+            if(!title || !link) return alert('Completa los campos');
+
+            const reps = JSON.parse(localStorage.getItem('misaReps') || "[]");
+            reps.push({ id: Date.now(), title, link });
+            localStorage.setItem('misaReps', JSON.stringify(reps));
+            
+            document.getElementById('repTitle').value = '';
+            document.getElementById('repLink').value = '';
+            renderRepertorios();
+        }
+
+        function deleteRep(id) {
+            if(confirm('¿Eliminar este repertorio?')) {
+                let reps = JSON.parse(localStorage.getItem('misaReps') || "[]");
+                reps = reps.filter(r => r.id !== id);
+                localStorage.setItem('misaReps', JSON.stringify(reps));
+                renderRepertorios();
+            }
+        }
+
+        function renderRepertorios() {
+            const reps = JSON.parse(localStorage.getItem('misaReps') || "[]");
+            const grid = document.getElementById('repertorioGrid');
+            grid.innerHTML = '';
+
+            reps.forEach(rep => {
+                grid.innerHTML += `
+                    <div class="card p-5 relative">
+                        <h3 class="font-bold text-lg text-indigo-900 mb-3">${rep.title}</h3>
+                        <div class="flex gap-2">
+                            <a href="${rep.link}" target="_blank" class="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full text-xs font-bold hover:bg-indigo-200 transition">Ver PDF / Imagen</a>
+                            <button onclick="deleteRep(${rep.id})" class="text-red-300 hover:text-red-600 ml-auto"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
         }
     </script>
 </body>
