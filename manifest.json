@@ -1,9 +1,16 @@
 {
-  "name": "MyBrowser Pro",
-  "short_name": "Browser",
+  "name": "Ultra Browser Pro",
+  "short_name": "UltraNav",
+  "description": "Navegador web personal basado en PWA",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#1a1a1a",
-  "theme_color": "#2d2d2d",
-  "icons": [{"src": "https://cdn-icons-png.flaticon.com/512/888/888846.png", "sizes": "512x512", "type": "image/png"}]
+  "background_color": "#0f172a",
+  "theme_color": "#1e293b",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/888/888846.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
