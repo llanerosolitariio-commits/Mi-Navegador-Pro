@@ -114,7 +114,7 @@
             const db = getFirestore(app);
 
             // CLAVE DE ACCESO AL PANEL (¡CAMBIA ESTO POR TU CLAVE SECRETA!)
-            const CLAVE_ADMIN = 'candy'; 
+            const CLAVE_ADMIN = 'miClaveSecreta123'; 
 
             // Mostrar el botón de admin al hacer scroll
             window.addEventListener('scroll', () => {
@@ -139,6 +139,79 @@
                     }
                 }
             };
+
+            window.saveInfo = async () => {
+                const text = document.getElementById('adminInfoInput').value;
+                if (!text) return alert("El aviso no puede estar vacío.");
+                try {
+                    await setDoc(doc(db, "ajustes", "avisoPrincipal"), { contenido: text });
+                    alert("Aviso actualizado para todos los fieles.");
+                } catch(e) { alert("Error al guardar el aviso: " + e.message); }
+            };
+
+            onSnapshot(doc(db, "ajustes", "avisoPrincipal"), (doc) => {
+                const infoDisplay = document.getElementById('infoDisplay');
+                const adminInfoInput = document.getElementById('adminInfoInput');
+                if (doc.exists() && doc.data().contenido) {
+                    infoDisplay.innerText = doc.data().contenido;
+                    adminInfoInput.value = doc.data().contenido;
+                } else {
+                    infoDisplay.innerText = "¡Bienvenido/a! Aquí publicaremos los avisos parroquiales y los cantos para la misa de cada domingo.";
+                    adminInfoInput.value = "";
+                }
+            });
+
+            window.addRepertorio = async () => {
+                const title = document.getElementById('repTitle').value;
+                const link = document.getElementById('repLink').value;
+                if(!title || !link) return alert('Por favor, complete el título y el enlace.');
+                try {
+                    await addDoc(collection(db, "repertorios"), { title, link, fecha: Date.now() });
+                    document.getElementById('repTitle').value = '';
+                    document.getElementById('repLink').value = '';
+                    alert("Nuevo canto publicado con éxito.");
+                } catch(e) { alert("Error al agregar el repertorio: " + e.message); }
+            };
+
+            window.deleteRep = async (id) => {
+                if(confirm('¿Está seguro/a de eliminar este repertorio para todos los fieles?')) {
+                    try {
+                        await deleteDoc(doc(db, "repertorios", id));
+                        alert("Repertorio eliminado correctamente.");
+                    } catch(e) { alert("Error al eliminar el repertorio: " + e.message); }
+                }
+            };
+
+            const q = query(collection(db, "repertorios"), orderBy("fecha", "desc"));
+            onSnapshot(q, (snapshot) => {
+                const grid = document.getElementById('repertorioGrid');
+                grid.innerHTML = ''; // Limpiar la lista antes de añadir los nuevos
+                if (snapshot.empty) {
+                    grid.innerHTML = `
+                        <div class="md:col-span-2 text-center py-10 text-gray-600 font-semibold italic">
+                            Aún no hay repertorios publicados. El administrador los añadirá pronto.
+                        </div>`;
+                }
+                snapshot.forEach((documento) => {
+                    const rep = documento.data();
+                    grid.innerHTML += `
+                        <div class="card p-5 flex flex-col justify-between">
+                            <h3 class="font-bold text-gray-800 text-xl mb-4 text-center">${rep.title}</h3>
+                            <div class="flex items-center justify-center space-x-4">
+                                <a href="${rep.link}" target="_blank" class="bg-blue-600 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-blue-700 transition duration-200 shadow-md flex items-center gap-2">
+                                    <i class="fas fa-file-pdf"></i> VER CANTOS
+                                </a>
+                                <button onclick="deleteRep('${documento.id}')" class="text-gray-300 hover:text-red-600 transition duration-200 p-2 text-lg">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>`;
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>            };
 
             window.saveInfo = async () => {
                 const text = document.getElementById('adminInfoInput').value;
@@ -490,6 +563,7 @@
     </script>
 </body>
 </html>
+
 
 
 
