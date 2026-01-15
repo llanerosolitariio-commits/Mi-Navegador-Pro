@@ -3,109 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultra Browser Pro</title>
+    <title>Mi Cine Personal</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body, html { height: 100%; margin: 0; background: #0f172a; font-family: sans-serif; overflow: hidden; }
-        .nav-bar { background: #1e293b; padding: 10px; display: flex; gap: 8px; align-items: center; border-bottom: 1px solid #334155; }
-        input { background: #334155; color: white; border: 1px solid #475569; padding: 8px 16px; border-radius: 9999px; flex-grow: 1; outline: none; font-size: 14px; }
-        input:focus { border-color: #38bdf8; background: #1e293b; }
-        .view-container { height: calc(100% - 60px); width: 100%; background: white; position: relative; }
-        iframe { width: 100%; height: 100%; border: none; }
-        .overlay-home { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .card { background: #1e293b; transition: all 0.3s; border: 1px solid #334155; }
-        .card:hover { transform: translateY(-5px); background: #334155; border-color: #38bdf8; }
+        body { background: #0a0a0a; color: white; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        video { width: 100%; border-radius: 1rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .movie-card:hover { transform: scale(1.05); background: #1a1a1a; }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-10">
 
-    <div class="nav-bar">
-        <button onclick="goHome()" class="text-white w-10 h-10 hover:bg-slate-700 rounded-full flex items-center justify-center transition">
-            <i class="fas fa-home text-lg"></i>
-        </button>
-        <input type="text" id="urlInput" placeholder="Busca o escribe una URL (ej: wikipedia.org)...">
-        <button onclick="loadURL()" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-full text-sm font-bold transition shadow-lg">
-            IR
-        </button>
-    </div>
-
-    <div class="view-container">
-        <div id="homeScreen" class="overlay-home text-center">
-            <div class="mb-8">
-                <h2 class="text-5xl font-black text-white tracking-tighter mb-2">ULTRA<span class="text-blue-500">NAV</span></h2>
-                <p class="text-slate-400">Navegador Privado Personal</p>
+    <div class="max-w-6xl mx-auto">
+        <div class="flex flex-wrap justify-between items-center mb-10 gap-4">
+            <div>
+                <h1 class="text-4xl font-black text-red-600 tracking-tighter">MI<span class="text-white">CINE</span></h1>
+                <p class="text-gray-500 text-sm">Streaming Local de Alta Velocidad</p>
             </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl">
-                <div onclick="quickLoad('https://www.wikipedia.org')" class="card p-6 rounded-2xl cursor-pointer">
-                    <i class="fab fa-wikipedia-w text-3xl text-white mb-3"></i>
-                    <p class="text-xs font-bold text-slate-300">Wikipedia</p>
-                </div>
-                <div onclick="quickLoad('https://duckduckgo.com')" class="card p-6 rounded-2xl cursor-pointer">
-                    <i class="fas fa-search text-3xl text-orange-500 mb-3"></i>
-                    <p class="text-xs font-bold text-slate-300">DuckDuckGo</p>
-                </div>
-                <div onclick="quickLoad('https://m.youtube.com')" class="card p-6 rounded-2xl cursor-pointer">
-                    <i class="fab fa-youtube text-3xl text-red-500 mb-3"></i>
-                    <p class="text-xs font-bold text-slate-300">YouTube M.</p>
-                </div>
-                <div onclick="quickLoad('https://m.facebook.com')" class="card p-6 rounded-2xl cursor-pointer">
-                    <i class="fab fa-facebook text-3xl text-blue-500 mb-3"></i>
-                    <p class="text-xs font-bold text-slate-300">Facebook M.</p>
-                </div>
-            </div>
-            
-            <p class="mt-12 text-slate-600 text-[10px] max-w-sm uppercase tracking-widest">
-                Nota: Los sitios con alta seguridad podrían no cargar por políticas de marcos (iFrames).
-            </p>
+            <label class="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-xl font-bold cursor-pointer transition shadow-lg flex items-center gap-2">
+                <i class="fas fa-film"></i> CARGAR CARPETA DE PELIS
+                <input type="file" id="movieInput" webkitdirectory directory multiple class="hidden">
+            </label>
         </div>
 
-        <iframe id="browserFrame" src=""></iframe>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div class="lg:col-span-2">
+                <div id="playerContainer" class="hidden">
+                    <video id="mainVideo" controls class="mb-6"></video>
+                    <h2 id="playingTitle" class="text-2xl font-bold mb-2"></h2>
+                    <hr class="border-gray-800">
+                </div>
+                <div id="emptyState" class="glass p-20 rounded-3xl text-center">
+                    <i class="fas fa-clapperboard text-6xl text-gray-700 mb-6 block"></i>
+                    <h3 class="text-xl font-medium text-gray-400">Selecciona la carpeta donde tienes tus películas para empezar</h3>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="glass rounded-3xl overflow-hidden p-4">
+                    <h3 class="font-bold mb-4 flex items-center gap-2">
+                        <i class="fas fa-list text-red-500"></i> Biblioteca (<span id="movieCount">0</span>)
+                    </h3>
+                    <div id="movieList" class="space-y-2 max-h-[70vh] overflow-y-auto pr-2">
+                        </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Registro de App Instalable
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
 
-        const input = document.getElementById('urlInput');
-        const frame = document.getElementById('browserFrame');
-        const home = document.getElementById('homeScreen');
+        const movieInput = document.getElementById('movieInput');
+        const movieList = document.getElementById('movieList');
+        const mainVideo = document.getElementById('mainVideo');
+        const playerContainer = document.getElementById('playerContainer');
+        const emptyState = document.getElementById('emptyState');
+        const playingTitle = document.getElementById('playingTitle');
+        const movieCount = document.getElementById('movieCount');
 
-        function loadURL() {
-            let val = input.value.trim();
-            if (!val) return;
-
-            let url;
-            // Si parece una URL (tiene punto y no espacios)
-            if (val.includes('.') && !val.includes(' ')) {
-                url = val.startsWith('http') ? val : 'https://' + val;
-            } else {
-                // Si es una palabra, buscar en DuckDuckGo
-                url = 'https://duckduckgo.com/?q=' + encodeURIComponent(val);
+        movieInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            // Filtramos archivos de video comunes
+            const movies = files.filter(f => f.type.startsWith('video/') || f.name.endsWith('.mkv'));
+            
+            if (movies.length > 0) {
+                movieCount.innerText = movies.length;
+                emptyState.classList.add('hidden');
+                playerContainer.classList.remove('hidden');
+                renderMovies(movies);
+                loadMovie(movies[0]);
             }
-            quickLoad(url);
-        }
-
-        function quickLoad(url) {
-            home.style.display = 'none';
-            frame.src = url;
-            input.value = url;
-        }
-
-        function goHome() {
-            home.style.display = 'flex';
-            frame.src = '';
-            input.value = '';
-        }
-
-        // Detectar tecla Enter
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') loadURL();
         });
+
+        function renderMovies(movies) {
+            movieList.innerHTML = '';
+            movies.forEach((movie, index) => {
+                const item = document.createElement('div');
+                item.className = "movie-card p-3 rounded-xl cursor-pointer transition flex items-center gap-3 border border-transparent";
+                item.innerHTML = `
+                    <div class="w-12 h-12 bg-gray-800 rounded flex items-center justify-center">
+                        <i class="fas fa-play text-xs"></i>
+                    </div>
+                    <p class="text-sm truncate font-medium">${movie.name}</p>
+                `;
+                item.onclick = () => loadMovie(movie);
+                movieList.appendChild(item);
+            });
+        }
+
+        function loadMovie(file) {
+            const url = URL.createObjectURL(file);
+            mainVideo.src = url;
+            playingTitle.innerText = file.name.replace(/\.[^/.]+$/, "");
+            mainVideo.play();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     </script>
 </body>
 </html>
