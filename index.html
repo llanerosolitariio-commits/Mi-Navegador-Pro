@@ -36,6 +36,179 @@
             background: white;
             border-radius: 20px;
             border-bottom: 5px solid #c5a059;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .btn-whatsapp {
+            background: #25d366;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+            transition: transform 0.3s;
+        }
+
+        .btn-whatsapp:hover { transform: scale(1.05); }
+
+        .btn-admin-shield {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1a365d;
+            color: #c5a059;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.4;
+            cursor: pointer;
+            z-index: 100;
+        }
+        .btn-admin-shield:hover { opacity: 1; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="overlay">
+        <nav class="nav-liturgica p-6 text-center shadow-xl">
+            <h1 class="text-white text-3xl md:text-4xl font-bold tracking-wide">Cantos para la Santa Misa</h1>
+            <p class="text-yellow-200 italic text-sm mt-2 font-light">"Quien canta, ora dos veces" — San Agustín</p>
+        </nav>
+
+        <main class="max-w-4xl mx-auto p-4 md:p-8">
+            <section class="mb-10 text-center">
+                <div class="bg-white/80 p-8 rounded-3xl border-2 border-indigo-50 shadow-sm">
+                    <i class="fas fa-dove text-indigo-400 text-3xl mb-4"></i>
+                    <h2 class="text-indigo-900 font-bold uppercase text-xs tracking-widest mb-3">Mensaje Parroquial</h2>
+                    <p id="infoDisplay" class="text-xl text-gray-800 italic leading-relaxed">Cargando...</p>
+                    
+                    <div class="mt-8 pt-6 border-t border-gray-100">
+                        <p class="text-sm text-gray-500 mb-4">¿Necesitas que oremos por una intención especial?</p>
+                        <a href="https://wa.me/543704511076?text=Hola,%20quisiera%20pedir%20una%20intención%20de%20oración%20para%20la%20próxima%20Misa:" 
+                           target="_blank" class="btn-whatsapp">
+                            <i class="fab fa-whatsapp text-xl"></i> PEDIR PETICIÓN DE ORACIÓN
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="text-2xl font-bold text-indigo-900 uppercase tracking-tight text-center mb-8">Repertorios de Domingo</h2>
+                <div id="repertorioGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    </div>
+            </section>
+        </main>
+    </div>
+
+    <div onclick="document.getElementById('adminModal').classList.remove('hidden')" class="btn-admin-shield">
+        <i class="fas fa-shield-alt"></i>
+    </div>
+
+    <div id="adminModal" class="hidden fixed inset-0 bg-indigo-900/90 backdrop-blur-md z-[110] p-4 flex items-center justify-center">
+        <div class="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <h2 class="text-2xl font-bold text-indigo-900">Panel de Administración</h2>
+                <button onclick="document.getElementById('adminModal').classList.add('hidden')" class="text-gray-400 text-3xl">&times;</button>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-indigo-900 mb-2">Aviso / Mensaje Principal:</label>
+                    <textarea id="adminInfoInput" class="w-full border-2 border-indigo-50 rounded-xl p-3 outline-none focus:border-indigo-500" rows="3"></textarea>
+                    <button onclick="saveInfo()" class="mt-2 bg-indigo-600 text-white w-full py-2 rounded-xl font-bold shadow-md">Publicar Aviso</button>
+                </div>
+
+                <hr>
+
+                <div>
+                    <label class="block text-sm font-bold text-indigo-900 mb-2">Nuevo Repertorio:</label>
+                    <input type="text" id="repTitle" placeholder="Ej: Domingo de Ramos" class="w-full border-2 border-indigo-50 rounded-xl p-3 mb-2">
+                    <input type="text" id="repLink" placeholder="Enlace del PDF o Imagen" class="w-full border-2 border-indigo-50 rounded-xl p-3 mb-4">
+                    <button onclick="addRepertorio()" class="bg-emerald-600 text-white w-full py-3 rounded-xl font-bold">Publicar Cantos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBBanDBBiOdoaNrgzUGlIsfkWl5FLTMM3E",
+            authDomain: "cantosmisa-9302b.firebaseapp.com",
+            projectId: "cantosmisa-9302b",
+            storageBucket: "cantosmisa-9302b.firebasestorage.app",
+            messagingSenderId: "16103888796",
+            appId: "1:16103888796:web:95ab73d3f002414a3fda59",
+            measurementId: "G-12D4MCRXKQ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Guardar Mensaje
+        window.saveInfo = async () => {
+            const text = document.getElementById('adminInfoInput').value;
+            await setDoc(doc(db, "ajustes", "avisoPrincipal"), { contenido: text });
+            alert("Publicado con éxito");
+        };
+
+        // Leer Mensaje en vivo
+        onSnapshot(doc(db, "ajustes", "avisoPrincipal"), (doc) => {
+            if (doc.exists()) {
+                document.getElementById('infoDisplay').innerText = doc.data().contenido;
+                document.getElementById('adminInfoInput').value = doc.data().contenido;
+            }
+        });
+
+        // Agregar Cantos
+        window.addRepertorio = async () => {
+            const title = document.getElementById('repTitle').value;
+            const link = document.getElementById('repLink').value;
+            if(!title || !link) return alert('Por favor, completa los datos');
+            await addDoc(collection(db, "repertorios"), { title, link, fecha: Date.now() });
+            document.getElementById('repTitle').value = '';
+            document.getElementById('repLink').value = '';
+        };
+
+        // Borrar Cantos
+        window.deleteRep = async (id) => {
+            if(confirm('¿Eliminar repertorio?')) await deleteDoc(doc(db, "repertorios", id));
+        };
+
+        // Escuchar Cantos en vivo
+        const q = query(collection(db, "repertorios"), orderBy("fecha", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const grid = document.getElementById('repertorioGrid');
+            grid.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const rep = doc.data();
+                grid.innerHTML += `
+                    <div class="card-canto p-6 text-center border bg-white">
+                        <h3 class="font-bold text-xl text-indigo-900 mb-4">${rep.title}</h3>
+                        <div class="flex items-center justify-center gap-3">
+                            <a href="${rep.link}" target="_blank" class="bg-indigo-900 text-yellow-200 px-6 py-2 rounded-full text-sm font-bold shadow-md hover:bg-indigo-800 transition">
+                                <i class="fas fa-music mr-2"></i> VER CANTOS
+                            </a>
+                            <button onclick="deleteRep('${doc.id}')" class="text-gray-200 hover:text-red-500 transition">
+                                <i class="fas fa-trash-alt text-sm"></i>
+                            </button>
+                        </div>
+                    </div>`;
+            });
+        });
+    </script>
+</body>
+</html>            border-radius: 20px;
+            border-bottom: 5px solid #c5a059;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
@@ -882,6 +1055,7 @@
     </script>
 </body>
 </html>
+
 
 
 
