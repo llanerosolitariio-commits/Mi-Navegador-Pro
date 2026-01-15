@@ -3,37 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Web Browser</title>
+    <title>Ultra Browser Pro</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body, html { height: 100%; margin: 0; background: #1a1a1a; overflow: hidden; }
-        .browser-bar { background: #2d2d2d; padding: 10px; display: flex; gap: 10px; align-items: center; }
-        input { background: #3d3d3d; color: white; border: none; padding: 8px 15px; border-radius: 20px; flex-grow: 1; outline: none; }
-        iframe { width: 100%; height: calc(100% - 60px); border: none; background: white; }
-        .btn { color: #ccc; cursor: pointer; padding: 5px 10px; }
-        .btn:hover { color: white; }
+        body, html { height: 100%; margin: 0; background: #0f172a; font-family: sans-serif; overflow: hidden; }
+        .nav-bar { background: #1e293b; padding: 10px; display: flex; gap: 8px; align-items: center; border-bottom: 1px solid #334155; }
+        input { background: #334155; color: white; border: 1px solid #475569; padding: 8px 16px; border-radius: 9999px; flex-grow: 1; outline: none; font-size: 14px; }
+        input:focus { border-color: #38bdf8; background: #1e293b; }
+        .view-container { height: calc(100% - 60px); width: 100%; background: white; position: relative; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .overlay-home { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .card { background: #1e293b; transition: all 0.3s; border: 1px solid #334155; }
+        .card:hover { transform: translateY(-5px); background: #334155; border-color: #38bdf8; }
     </style>
 </head>
 <body>
-    <div class="browser-bar">
-        <i class="fas fa-home btn" onclick="goHome()"></i>
-        <input type="text" id="urlInput" placeholder="Escribe una URL (ej: https://www.bing.com)">
-        <i class="fas fa-arrow-right btn" onclick="loadURL()"></i>
+
+    <div class="nav-bar">
+        <button onclick="goHome()" class="text-white w-10 h-10 hover:bg-slate-700 rounded-full flex items-center justify-center transition">
+            <i class="fas fa-home text-lg"></i>
+        </button>
+        <input type="text" id="urlInput" placeholder="Busca o escribe una URL (ej: wikipedia.org)...">
+        <button onclick="loadURL()" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-full text-sm font-bold transition shadow-lg">
+            IR
+        </button>
     </div>
-    <iframe id="browserFrame" src="https://www.bing.com"></iframe>
+
+    <div class="view-container">
+        <div id="homeScreen" class="overlay-home text-center">
+            <div class="mb-8">
+                <h2 class="text-5xl font-black text-white tracking-tighter mb-2">ULTRA<span class="text-blue-500">NAV</span></h2>
+                <p class="text-slate-400">Navegador Privado Personal</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl">
+                <div onclick="quickLoad('https://www.wikipedia.org')" class="card p-6 rounded-2xl cursor-pointer">
+                    <i class="fab fa-wikipedia-w text-3xl text-white mb-3"></i>
+                    <p class="text-xs font-bold text-slate-300">Wikipedia</p>
+                </div>
+                <div onclick="quickLoad('https://duckduckgo.com')" class="card p-6 rounded-2xl cursor-pointer">
+                    <i class="fas fa-search text-3xl text-orange-500 mb-3"></i>
+                    <p class="text-xs font-bold text-slate-300">DuckDuckGo</p>
+                </div>
+                <div onclick="quickLoad('https://m.youtube.com')" class="card p-6 rounded-2xl cursor-pointer">
+                    <i class="fab fa-youtube text-3xl text-red-500 mb-3"></i>
+                    <p class="text-xs font-bold text-slate-300">YouTube M.</p>
+                </div>
+                <div onclick="quickLoad('https://m.facebook.com')" class="card p-6 rounded-2xl cursor-pointer">
+                    <i class="fab fa-facebook text-3xl text-blue-500 mb-3"></i>
+                    <p class="text-xs font-bold text-slate-300">Facebook M.</p>
+                </div>
+            </div>
+            
+            <p class="mt-12 text-slate-600 text-[10px] max-w-sm uppercase tracking-widest">
+                Nota: Los sitios con alta seguridad podrían no cargar por políticas de marcos (iFrames).
+            </p>
+        </div>
+
+        <iframe id="browserFrame" src=""></iframe>
+    </div>
+
     <script>
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+        // Registro de App Instalable
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
         const input = document.getElementById('urlInput');
         const frame = document.getElementById('browserFrame');
+        const home = document.getElementById('homeScreen');
+
         function loadURL() {
-            let url = input.value;
-            if (!url.startsWith('http')) url = 'https://' + url;
-            frame.src = url;
+            let val = input.value.trim();
+            if (!val) return;
+
+            let url;
+            // Si parece una URL (tiene punto y no espacios)
+            if (val.includes('.') && !val.includes(' ')) {
+                url = val.startsWith('http') ? val : 'https://' + val;
+            } else {
+                // Si es una palabra, buscar en DuckDuckGo
+                url = 'https://duckduckgo.com/?q=' + encodeURIComponent(val);
+            }
+            quickLoad(url);
         }
-        function goHome() { frame.src = 'https://www.bing.com'; }
-        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') loadURL(); });
+
+        function quickLoad(url) {
+            home.style.display = 'none';
+            frame.src = url;
+            input.value = url;
+        }
+
+        function goHome() {
+            home.style.display = 'flex';
+            frame.src = '';
+            input.value = '';
+        }
+
+        // Detectar tecla Enter
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loadURL();
+        });
     </script>
 </body>
 </html>
