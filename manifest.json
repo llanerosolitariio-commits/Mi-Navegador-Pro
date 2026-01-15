@@ -1,14 +1,13 @@
 {
-  "name": "Ultra Browser Pro",
-  "short_name": "UltraNav",
-  "description": "Navegador web personal basado en PWA",
+  "name": "Mi Cine Pro",
+  "short_name": "MiCine",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#1e293b",
+  "background_color": "#0a0a0a",
+  "theme_color": "#e11d48",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/888/888846.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/2503/2503508.png",
       "sizes": "512x512",
       "type": "image/png"
     }
